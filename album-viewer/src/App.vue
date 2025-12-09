@@ -3,6 +3,10 @@
     <header class="header">
       <h1>🎵 Album Collection</h1>
       <p>Discover amazing music albums</p>
+      <button class="cart-button" @click="openCart">
+        🛒
+        <span v-if="cartItemCount > 0" class="cart-badge">{{ cartItemCount }}</span>
+      </button>
     </header>
 
     <main class="main">
@@ -24,6 +28,8 @@
         />
       </div>
     </main>
+
+    <CartModal :isOpen="isCartOpen" @close="closeCart" />
   </div>
 </template>
 
@@ -31,11 +37,16 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import AlbumCard from './components/AlbumCard.vue'
+import CartModal from './components/CartModal.vue'
 import type { Album } from './types/album'
+import { useCart } from './composables/useCart'
 
 const albums = ref<Album[]>([])
 const loading = ref<boolean>(true)
 const error = ref<string | null>(null)
+const isCartOpen = ref<boolean>(false)
+
+const { cartItemCount } = useCart()
 
 const fetchAlbums = async (): Promise<void> => {
   try {
@@ -49,6 +60,14 @@ const fetchAlbums = async (): Promise<void> => {
   } finally {
     loading.value = false
   }
+}
+
+const openCart = (): void => {
+  isCartOpen.value = true
+}
+
+const closeCart = (): void => {
+  isCartOpen.value = false
 }
 
 onMounted(() => {
@@ -66,6 +85,7 @@ onMounted(() => {
   text-align: center;
   margin-bottom: 3rem;
   color: white;
+  position: relative;
 }
 
 .header h1 {
@@ -77,6 +97,48 @@ onMounted(() => {
 .header p {
   font-size: 1.2rem;
   opacity: 0.9;
+}
+
+.cart-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  color: white;
+  font-size: 1.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.cart-button:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e74c3c;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
 }
 
 .main {
@@ -149,6 +211,12 @@ onMounted(() => {
   
   .header h1 {
     font-size: 2rem;
+  }
+
+  .cart-button {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
   }
   
   .albums-grid {
